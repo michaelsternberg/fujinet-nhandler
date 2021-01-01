@@ -612,6 +612,9 @@ SPCDNE:	RTS
 
 SPEDCB .BYTE      DEVIDN  ; DDEVIC
        .BYTE      $FF     ; DUNIT
+	LDA	DSTATS
+	CMP	#144
+	BEQ	BLDON
        .BYTE      $FF     ; DCOMND ; inq
        .BYTE      DSREAD     ; DSTATS
        .WORD      INQDS    ; DBUFL
@@ -626,20 +629,18 @@ SPEDCB .BYTE      DEVIDN  ; DDEVIC
 BLOAD:	JSR	OPEN
 
 	; Read header (expect FFFF)
-GETFIL: LDA	#$02
-	STA	RLEN
+GETFIL: JSR	GDIDX
+	LDA	#$02
+	STA	RLEN,X
 	JSR	READ
-
-	LDA	DSTATS
-	CMP	#144
-	BEQ	BLDON
 
 	; Check if FFFF
 	JSR	CHKFF
 
 	; Read start/end addresses
+	JSR	GDIDX
        	LDA	#$04
-	STA	RLEN
+	STA	RLEN,X
 	JSR	READ
 
 	; Save start/end addresses
@@ -667,12 +668,13 @@ GETFIL: LDA	#$02
 	JSR	RENTR		; Use entry point into READ
 	
 	; Restore RBUF
-	;LDA	#<RBUF
-	;STA	READCB+4
-	;LDA	#>RBUF
-	;STA	READCB+5
-	LDA 	#$00
-	BEQ 	GETFIL		; Force loop
+	LDA	#<RBUF
+	STA	READCB+4
+	LDA	#>RBUF
+	STA	READCB+5
+
+	;LDA 	#$00
+	;BEQ 	GETFIL		; Force loop
 
 BLDON:	LDY	#$01		; Return success for now
 	RTS

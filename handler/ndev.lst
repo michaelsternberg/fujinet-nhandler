@@ -96,7 +96,7 @@ Source: ndev.s
     94 					
     95 					;; This is for OS/A+
     96
-    97 FFFF> 2200-259E> 60		RTS			; Immediately exit
+    97 FFFF> 2200-25AA> 60		RTS			; Immediately exit
     98
     99 				;;; RESET HANDLER ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    100
@@ -115,7 +115,7 @@ Source: ndev.s
    113 				;;; INTERRUPT HANDLER ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    114
    115 2215 A9 01		INTR:	LDA	#$01		; set trip to 1
-   116 2217 8D 9F 25			STA	TRIP
+   116 2217 8D AB 25			STA	TRIP
    117 221A 68				PLA
    118 221B 40				RTI
    119 					
@@ -155,11 +155,11 @@ Source: ndev.s
    153 2239 20 1C 22		SVSTAT: JSR	GDIDX	   	; Get Unit into X
    154 223C 20 96 22			JSR	CAPRX		; Cap RX values
    155 223F AD EA 02			LDA	DVSTAT		; Get RX bytes waiting
-   156 2242 9D A0 25			STA	RLEN,X		; Save RX bytes waiting
+   156 2242 9D AC 25			STA	RLEN,X		; Save RX bytes waiting
    157 2245 AD EC 02			LDA	DVSTAT+2	; Get Server Client connected/disconnected?
-   158 2248 9D AD 25			STA	DVS2,X		; Save 
+   158 2248 9D B9 25			STA	DVS2,X		; Save 
    159 224B AD ED 02			LDA	DVSTAT+3	; Get last error
-   160 224E 9D B1 25			STA	DVS3,X		; Save
+   160 224E 9D BD 25			STA	DVS3,X		; Save
    161 2251 60				RTS
    162 					
    163 					;; Enable PROCEED interrupt
@@ -181,7 +181,7 @@ Source: ndev.s
    179 2264 20 1C 22		FLUSH:	JSR	GDIDX		; UNIT NUMBER into X
    180 2267 A5 21			LDA	ZICDNO		; IOCB UNIT #
    181 2269 8D 8B 22			STA	FLUDCB+1	; Put into table.
-   182 226C BD A8 25			LDA	TOFF,X		; get Transmit offset (# of bytes to send)
+   182 226C BD B4 25			LDA	TOFF,X		; get Transmit offset (# of bytes to send)
    183 226F F0 18			BEQ	FLDONE		; Don't do anything if TX cursor is at 0.
    184 2271 8D 92 22			STA	FLUDCB+8	; Put into Table (Len and Aux)
    185 2274 8D 94 22			STA	FLUDCB+10
@@ -190,7 +190,7 @@ Source: ndev.s
    188 227B 20 6C 23			JSR	DOSIOV		; And call SIOV
    189 227E 20 1C 22			JSR	GDIDX		; Get Unit into X
    190 2281 A9 00			LDA	#$00		; Clear TOFF
-   191 2283 9D A8 25			STA	TOFF,X
+   191 2283 9D B4 25			STA	TOFF,X
    192 2286 AC 03 03			LDY	DSTATS
    193 2289 60			FLDONE:	RTS			; Done, LDY has DSTATS
    194
@@ -198,7 +198,7 @@ Source: ndev.s
    196 228B FF				.BYTE      $FF     	; DUNIT
    197 228C 57				.BYTE      'W'     	; DCOMND
    198 228D 80				.BYTE      DSWRIT     	; DSTATS
-   199 228E 35 26			.WORD      TBUF    	; DBUFL
+   199 228E 41 26			.WORD      TBUF    	; DBUFL
    200 2290 1F				.BYTE      $1F     	; DTIMLO
    201 2291 00				.BYTE      $00     	; DRESVD
    202 2292 FF				.BYTE      $FF     	; DBYTL
@@ -221,12 +221,12 @@ Source: ndev.s
    219 					;; Close all IOCBs
    220
    221 22AB A9 04		CLALL:	LDA	#MAXDEV		; Close all 4 N: devices
-   222 22AD 8D 9F 25			STA	TRIP		; Temporarily use trip
-   223 22B0 AD 9F 25		CLLP:	LDA	TRIP		; Get
+   222 22AD 8D AB 25			STA	TRIP		; Temporarily use trip
+   223 22B0 AD AB 25		CLLP:	LDA	TRIP		; Get
    224 22B3 85 21			STA	ZICDNO		; Store into unit #
    225 22B5 20 C2 23			JSR	CLOSE		; Close Nx:
-   226 22B8 CE 9F 25			DEC	TRIP		; Decrement
-   227 22BB AD 9F 25			LDA	TRIP		; Get it
+   226 22B8 CE AB 25			DEC	TRIP		; Decrement
+   227 22BB AD AB 25			LDA	TRIP		; Get it
    228 22BE D0 F0			BNE	CLLP		; Loop until done.
    229 22C0 60				RTS	
    230
@@ -234,10 +234,10 @@ Source: ndev.s
    232
    233 22C1 20 1C 22		READ:	JSR	GDIDX	  	; unit into X
    234 22C4 A9 00			LDA	#$00		; Set 0 into
-   235 22C6 9D A4 25			STA	ROFF,X		; RXD cursor.
+   235 22C6 9D B0 25			STA	ROFF,X		; RXD cursor.
    236 22C9 A5 21			LDA	ZICDNO		; Get Unit #
    237 22CB 8D EF 22			STA	READCB+1	; Put into Read DCB table
-   238 22CE AD A0 25			LDA	RLEN		; Get RLEN (from status)
+   238 22CE AD AC 25			LDA	RLEN		; Get RLEN (from status)
    239 22D1 F0 1A			BEQ	RDONE		; If RLEN=0 then abort read.
    240 22D3 8D F6 22			STA	READCB+8	; Store in DBYTL
    241 22D6 8D F8 22			STA	READCB+10	; Store in DAUX1
@@ -255,7 +255,7 @@ Source: ndev.s
    253 22EF FF			       .BYTE     $FF     	; DUNIT
    254 22F0 52			       .BYTE     'R'     	; DCOMND
    255 22F1 40			       .BYTE     DSREAD     	; DSTATS
-   256 22F2 B5 25		       .WORD	 RBUF	 	; DBUF
+   256 22F2 C1 25		       .WORD	 RBUF	 	; DBUF
    257 22F4 1F			       .BYTE     $1F     	; DTIMLO
    258 22F5 00			       .BYTE     $00     	; DRESVD
    259 22F6 FF			       .BYTE     $FF     	; DBYTL
@@ -284,7 +284,7 @@ Source: ndev.s
    282 2312 85 0C			STA	DOSINI
    283 2314 A9 22			LDA	#>RESET
    284 2316 85 0D			STA	DOSINI+1
-   285 2318 A9 BD			LDA	#<HANDLEREND
+   285 2318 A9 C9			LDA	#<HANDLEREND
    286 231A 8D E7 02			STA	MEMLO
    287 231D 8D 05 22			STA	RESET+4
    288 2320 A9 26			LDA	#>HANDLEREND
@@ -333,11 +333,11 @@ Source: ndev.s
    331 				;;; CLEAR BUFFERS FOR UNIT X ;;;;;;;;;;;;;;;;;;;;
    332 					
    333 235A A9 00		CLRBUF:	LDA	#$00
-   334 235C 9D A0 25			STA	RLEN,X
-   335 235F 9D A8 25			STA	TOFF,X
-   336 2362 9D A4 25			STA	ROFF,X
-   337 2365 9D AD 25			STA	DVS2,X
-   338 2368 9D B1 25			STA	DVS3,X
+   334 235C 9D AC 25			STA	RLEN,X
+   335 235F 9D B4 25			STA	TOFF,X
+   336 2362 9D B0 25			STA	ROFF,X
+   337 2365 9D B9 25			STA	DVS2,X
+   338 2368 9D BD 25			STA	DVS3,X
    339 236B 60				RTS
    340 					
    341 				;;; COPY TABLE TO DCB AND DO SIO CALL ;;;;;;;;;;;
@@ -434,13 +434,13 @@ Source: ndev.s
    432 				;;; GET ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    433
    434 23E6 20 1C 22		GET:	JSR	GDIDX		; Unit into X
-   435 23E9 BD A0 25			LDA	RLEN,X		; Get current RX len from last STATUS
+   435 23E9 BD AC 25			LDA	RLEN,X		; Get current RX len from last STATUS
    436 23EC D0 29			BNE	GETDRN		; If RLEN > 0 then drain.
    437
    438 					;; Otherwise, we wai  t for something to happen.
    439
    440 23EE 20 52 22		GETWAI:	JSR	ENPRCD		; Enable Proceed
-   441 23F1 AD 9F 25			LDA	TRIP		; Did trip change?
+   441 23F1 AD AB 25			LDA	TRIP		; Did trip change?
    442 23F4 F0 F8			BEQ	GETWAI		; Nope, not yet...
    443
    444 					;; Something happened, try to poll for data.
@@ -466,17 +466,17 @@ Source: ndev.s
    464 					
    465 2417 20 5B 22		GETDRN:	JSR	DIPRCD		; Disable PROCEED
    466 241A 20 1C 22			JSR	GDIDX		; Get Unit into X again
-   467 241D DE A0 25			DEC	RLEN,X		; Decrement length
-   468 2420 BC A4 25			LDY	ROFF,X		; Get Current Offset into X
-   469 2423 B9 B5 25			LDA	RBUF,Y		; Get next character
-   470 2426 FE A4 25			INC	ROFF,X		; Increment cursor
+   467 241D DE AC 25			DEC	RLEN,X		; Decrement length
+   468 2420 BC B0 25			LDY	ROFF,X		; Get Current Offset into X
+   469 2423 B9 C1 25			LDA	RBUF,Y		; Get next character
+   470 2426 FE B0 25			INC	ROFF,X		; Increment cursor
    471 2429 A8				TAY			; Store in Y for a moment
    472
    473 					;; If RX buffer empty, turn off trip.
    474
-   475 242A BD A0 25			LDA	RLEN,X		; Get RLEN
+   475 242A BD AC 25			LDA	RLEN,X		; Get RLEN
    476 242D D0 03			BNE	GETDN2		; some left, just go done with success
-   477 242F 8D 9F 25			STA	TRIP		; Otherwise store 0 into trip
+   477 242F 8D AB 25			STA	TRIP		; Otherwise store 0 into trip
    478 					
    479 2432 98			GETDN2:	TYA			; Bring back char into A
    480 2433 A0 01			LDY	#$01		; 
@@ -485,10 +485,10 @@ Source: ndev.s
    483 				;;; PUT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    484
    485 2436 20 1C 22		PUT:	JSR	GDIDX		; Get Unit # into X
-   486 2439 BC A8 25			LDY	TOFF,X		; Get TX cursor
-   487 243C 99 35 26			STA	TBUF,Y		; Put char into buffer ptd by cursor
+   486 2439 BC B4 25			LDY	TOFF,X		; Get TX cursor
+   487 243C 99 41 26			STA	TBUF,Y		; Put char into buffer ptd by cursor
    488
-   489 243F FE A8 25			INC	TOFF,X		; Increment TX cursor
+   489 243F FE B4 25			INC	TOFF,X		; Increment TX cursor
    490
    491 					;; Do a FLUSH if EOL or buffer full
    492
@@ -506,21 +506,21 @@ Source: ndev.s
    504 					;; Return cached value if we still have data in RX
    505
    506 2451 20 1C 22			JSR	GDIDX		; Unit into X
-   507 2454 BD A0 25			LDA	RLEN,X		; Get RX len
+   507 2454 BD AC 25			LDA	RLEN,X		; Get RX len
    508 2457 D0 0E			BNE	STRETC		; Return cached value if RLEN > 0
    509
-   510 2459 AD 9F 25			LDA	TRIP		; Get TRIP?
+   510 2459 AD AB 25			LDA	TRIP		; Get TRIP?
    511 245C F0 09			BEQ	STRETC		; No trip? Return cached.
    512
    513 245E 20 20 22			JSR	POLL		; RLEN = 0, do poll.
    514 2461 20 39 22			JSR	SVSTAT		; Save DVSTAT values
    515 2464 20 C1 22			JSR	READ		; Do read.
    516 					
-   517 2467 BD A0 25		STRETC:	LDA	RLEN,X		; Get Saved DVSTAT+0 val
+   517 2467 BD AC 25		STRETC:	LDA	RLEN,X		; Get Saved DVSTAT+0 val
    518 246A 8D EA 02			STA	DVSTAT		; Store into DVSTAT
-   519 246D BD AD 25			LDA	DVS2,X		; Get Saved DVSTAT+2 val
+   519 246D BD B9 25			LDA	DVS2,X		; Get Saved DVSTAT+2 val
    520 2470 8D EC 02			STA	DVSTAT+2	; Store
-   521 2473 BD B1 25			LDA	DVS3,X		; Get Saved DVSTAT+3 val
+   521 2473 BD BD 25			LDA	DVS3,X		; Get Saved DVSTAT+3 val
    522 2476 8D ED 02			STA	DVSTAT+3
    523 2479 A8				TAY			; copy it into Y for error output.
    524 					
@@ -533,7 +533,7 @@ Source: ndev.s
    531 					;; Clear Trip
    532
    533 247B A9 00			LDA	#$00
-   534 247D 8D 9F 25			STA	TRIP
+   534 247D 8D AB 25			STA	TRIP
    535
    536 					;; Handle Local Commands
    537
@@ -548,7 +548,7 @@ Source: ndev.s
    546
    547 248E C9 28		SPB:	CMP	#40		; 40 = BINARY LOAD
    548 2490 D0 03			BNE	SPQ		; No.
-   549 2492 4C 15 25			JMP 	BLOAD		; Yes. Attempt binary load
+   549 2492 4C 1C 25			JMP 	BLOAD		; Yes. Attempt binary load
    550
    551 					;; Handle Protocol commands, do INQDS Query
    552
@@ -569,7 +569,7 @@ Source: ndev.s
    567 24B8 30 4E			BMI	SPCDNE		; SIO error, return in Y. There is no ext err.
    568
    569 					;; We got a query, if it's $FF, return unimplemented.
-   570 24BA AD AC 25			LDA	INQDS		; Get the Returned DSTATS value from inquiry
+   570 24BA AD B8 25			LDA	INQDS		; Get the Returned DSTATS value from inquiry
    571 24BD C9 FF			CMP	#$FF		; Is it $FF ?
    572 24BF D0 05			BNE	SPDO		; Nope, let's do it.
    573 24C1 A0 92			LDY	#146		; ERROR- 146  Unimplemented Command
@@ -581,7 +581,7 @@ Source: ndev.s
    579 24C8 8D 0A 25			STA	SPEDCB+1
    580 24CB A5 22			LDA	ZICCOM		; Command
    581 24CD 8D 0B 25			STA	SPEDCB+2
-   582 24D0 AD AC 25			LDA	INQDS		; Result of Inquiry
+   582 24D0 AD B8 25			LDA	INQDS		; Result of Inquiry
    583 24D3 8D 0C 25			STA	SPEDCB+3
    584 24D6 A5 24			LDA	ZICBAL		; Ptr to passed in devicespec
    585 24D8 8D 0D 25			STA	SPEDCB+4
@@ -614,130 +614,132 @@ Source: ndev.s
    612
    613 2509 71			SPEDCB .BYTE      DEVIDN  ; DDEVIC
    614 250A FF			       .BYTE      $FF     ; DUNIT
-   615 250B FF			       .BYTE      $FF     ; DCOMND ; inq
-   616 250C 40			       .BYTE      DSREAD     ; DSTATS
-   617 250D AC 25		       .WORD      INQDS    ; DBUFL
-   618 250F 1F			       .BYTE      $1F     ; DTIMLO
-   619 2510 00			       .BYTE      $00     ; DRESVD
-   620 2511 01			       .BYTE      $01     ; DBYTL
-   621 2512 00			       .BYTE      $00     ; DBYTH
-   622 2513 FF			       .BYTE      $FF     ; DAUX1
-   623 2514 FF			       .BYTE      $FF     ; DAUX2	
-   624
-   625 					; Binary Load (Command 40)
-   626 2515 20 85 23		BLOAD:	JSR	OPEN
+   615 250B AD 03 03			LDA	DSTATS
+   616 250E C9 90			CMP	#144
+   617 2510 F0 5C			BEQ	BLDON
+   618 2512 FF			       .BYTE      $FF     ; DCOMND ; inq
+   619 2513 40			       .BYTE      DSREAD     ; DSTATS
+   620 2514 B8 25		       .WORD      INQDS    ; DBUFL
+   621 2516 1F			       .BYTE      $1F     ; DTIMLO
+   622 2517 00			       .BYTE      $00     ; DRESVD
+   623 2518 01			       .BYTE      $01     ; DBYTL
+   624 2519 00			       .BYTE      $00     ; DBYTH
+   625 251A FF			       .BYTE      $FF     ; DAUX1
+   626 251B FF			       .BYTE      $FF     ; DAUX2	
    627
-   628 					; Read header (expect FFFF)
-   629 2518 A9 02		GETFIL: LDA	#$02
-   630 251A 8D A0 25			STA	RLEN
-   631 251D 20 C1 22			JSR	READ
-   632
-   633 2520 AD 03 03			LDA	DSTATS
-   634 2523 C9 90			CMP	#144
-   635 2525 F0 3B			BEQ	BLDON
+   628 					; Binary Load (Command 40)
+   629 251C 20 85 23		BLOAD:	JSR	OPEN
+   630
+   631 					; Read header (expect FFFF)
+   632 251F 20 1C 22		GETFIL: JSR	GDIDX
+   633 2522 A9 02			LDA	#$02
+   634 2524 9D AC 25			STA	RLEN,X
+   635 2527 20 C1 22			JSR	READ
    636
    637 					; Check if FFFF
-   638 2527 20 96 25			JSR	CHKFF
+   638 252A 20 A2 25			JSR	CHKFF
    639
    640 					; Read start/end addresses
-   641 252A A9 04		       	LDA	#$04
-   642 252C 8D A0 25			STA	RLEN
-   643 252F 20 C1 22			JSR	READ
-   644
-   645 					; Save start/end addresses
-   646 2532 20 65 25			JSR 	STRAD
-   647 2535 20 71 25			JSR	BUFLEN
-   648
-   649 					; Inject start addr into DCB DBUF
-   650 2538 AD B7 26			LDA	STL
-   651 253B 8D F2 22			STA	READCB+4
-   652 253E AD B8 26			LDA	STH
-   653 2541 8D F3 22			STA	READCB+5 	 
-   654
-   655 					; Inject payload size into DCB DBYT, AUX
-   656 2544 AD BB 26			LDA	BLL		
-   657 2547 8D F6 22			STA	READCB+8
-   658 254A 8D F8 22			STA	READCB+10
-   659 254D AD BC 26			LDA	BLH
-   660 2550 8D F7 22			STA	READCB+9
-   661 2553 8D F9 22			STA	READCB+11
-   662
-   663 					;---------------
-   664 2556 A9 40			LDA	#$40
-   665 2558 8D C6 02			STA	COLOR2
-   666 					;---------------
-   667 255B 20 D9 22			JSR	RENTR		; Use entry point into READ
-   668 					
-   669 					; Restore RBUF
-   670 					;LDA	#<RBUF
-   671 					;STA	READCB+4
-   672 					;LDA	#>RBUF
-   673 					;STA	READCB+5
-   674 255E A9 00			LDA 	#$00
-   675 2560 F0 B6			BEQ 	GETFIL		; Force loop
-   676
-   677 2562 A0 01		BLDON:	LDY	#$01		; Return success for now
-   678 2564 60				RTS
-   679
-   680 					; Store start/end addresses
-   681 2565 A2 03		STRAD:	LDX	#$03		; Iterate 4 times
-   682 2567 BD B5 25		STRLP:	LDA	RBUF,X
-   683 256A 9D B7 26			STA	STL,X
-   684 256D CA				DEX
-   685 256E D0 F7			BNE	STRLP
-   686 2570 60				RTS
-   687 					
-   688 					; Calculate binary payload size
-   689 2571 AD B9 26		BUFLEN: LDA	ENL
-   690 2574 38			        SEC
-   691 2575 ED B7 26		        SBC	STL
-   692 2578 8D BB 26		        STA	BLL             ; LOW BYTE
-   693 257B AD BA 26		        LDA	ENH
-   694 257E ED B8 26		        SBC	STH
-   695 2581 8D BC 26		        STA	BLH             ; HIGH BYTE
-   696 2584 18			        CLC                     ; NOW ADD ONE
-   697 2585 AD BB 26		        LDA	BLL
-   698 2588 69 01		        ADC	#1
-   699 258A 8D BB 26		        STA	BLL
-   700 258D AD BC 26		        LDA	BLH
-   701 2590 69 00		        ADC	#0              ; TAKE CARE OF ANY CARRY
-   702 2592 8D BC 26		        STA	BLH
-   703 2595 60			        RTS
-   704 					
-   705 					; Confirm header begins with FFFF
-   706 2596 EE B5 25		CHKFF:	INC	RBUF		; If FF then now 00
-   707 2599 D0 03			BNE	CHDON		; Quit if it wasnt FF
-   708 259B EE B6 25			INC	RBUF+1		; Again
-   709 259E 60			CHDON:	RTS
-   710
-   711 					
-   712 					;; End of Handler
-   713
-   714 				;;; VARIABLES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   641 252D 20 1C 22			JSR	GDIDX
+   642 2530 A9 04		       	LDA	#$04
+   643 2532 9D AC 25			STA	RLEN,X
+   644 2535 20 C1 22			JSR	READ
+   645
+   646 					; Save start/end addresses
+   647 2538 20 71 25			JSR 	STRAD
+   648 253B 20 7D 25			JSR	BUFLEN
+   649
+   650 					; Inject start addr into DCB DBUF
+   651 253E AD C3 26			LDA	STL
+   652 2541 8D F2 22			STA	READCB+4
+   653 2544 AD C4 26			LDA	STH
+   654 2547 8D F3 22			STA	READCB+5 	 
+   655
+   656 					; Inject payload size into DCB DBYT, AUX
+   657 254A AD C7 26			LDA	BLL		
+   658 254D 8D F6 22			STA	READCB+8
+   659 2550 8D F8 22			STA	READCB+10
+   660 2553 AD C8 26			LDA	BLH
+   661 2556 8D F7 22			STA	READCB+9
+   662 2559 8D F9 22			STA	READCB+11
+   663
+   664 					;---------------
+   665 255C A9 40			LDA	#$40
+   666 255E 8D C6 02			STA	COLOR2
+   667 					;---------------
+   668 2561 20 D9 22			JSR	RENTR		; Use entry point into READ
+   669 					
+   670 					; Restore RBUF
+   671 2564 A9 C1			LDA	#<RBUF
+   672 2566 8D F2 22			STA	READCB+4
+   673 2569 A9 25			LDA	#>RBUF
+   674 256B 8D F3 22			STA	READCB+5
+   675
+   676 					;LDA 	#$00
+   677 					;BEQ 	GETFIL		; Force loop
+   678
+   679 256E A0 01		BLDON:	LDY	#$01		; Return success for now
+   680 2570 60				RTS
+   681
+   682 					; Store start/end addresses
+   683 2571 A2 03		STRAD:	LDX	#$03		; Iterate 4 times
+   684 2573 BD C1 25		STRLP:	LDA	RBUF,X
+   685 2576 9D C3 26			STA	STL,X
+   686 2579 CA				DEX
+   687 257A D0 F7			BNE	STRLP
+   688 257C 60				RTS
+   689 					
+   690 					; Calculate binary payload size
+   691 257D AD C5 26		BUFLEN: LDA	ENL
+   692 2580 38			        SEC
+   693 2581 ED C3 26		        SBC	STL
+   694 2584 8D C7 26		        STA	BLL             ; LOW BYTE
+   695 2587 AD C6 26		        LDA	ENH
+   696 258A ED C4 26		        SBC	STH
+   697 258D 8D C8 26		        STA	BLH             ; HIGH BYTE
+   698 2590 18			        CLC                     ; NOW ADD ONE
+   699 2591 AD C7 26		        LDA	BLL
+   700 2594 69 01		        ADC	#1
+   701 2596 8D C7 26		        STA	BLL
+   702 2599 AD C8 26		        LDA	BLH
+   703 259C 69 00		        ADC	#0              ; TAKE CARE OF ANY CARRY
+   704 259E 8D C8 26		        STA	BLH
+   705 25A1 60			        RTS
+   706 					
+   707 					; Confirm header begins with FFFF
+   708 25A2 EE C1 25		CHKFF:	INC	RBUF		; If FF then now 00
+   709 25A5 D0 03			BNE	CHDON		; Quit if it wasnt FF
+   710 25A7 EE C2 25			INC	RBUF+1		; Again
+   711 25AA 60			CHDON:	RTS
+   712
+   713 					
+   714 					;; End of Handler
    715
-   716 = 259F			TRIP	.ds	1		; Interrupt Tripped?
-   717 = 25A0			RLEN	.ds	MAXDEV		; RXD Len
-   718 = 25A4			ROFF	.ds	MAXDEV		; RXD offset cursor
-   719 = 25A8			TOFF	.ds	MAXDEV		; TXD offset cursor
-   720 = 25AC			INQDS	.ds	1		; DSTATS to return in inquiry
-   721 = 25AD			DVS2	.ds	MAXDEV		; DVSTAT+2 SAVE
-   722 = 25B1			DVS3	.ds	MAXDEV		; DVSTAT+3 SAVE
-   723
-   724 = 25B5			RBUF	.ds	128		; RXD buffer
-   725 = 2635			TBUF	.ds	128		; TXD buffer
-   726 					
-   727 				;;; BINARY LOADER TEMP VARIABLES ;;;;;;;;;;;;;;;;
-   728
-   729 = 26B5			SL	.ds     1
-   730 = 26B6			SH	.ds     1
-   731 = 26B7			STL	.ds     1
-   732 = 26B8			STH	.ds     1
-   733 = 26B9			ENL	.ds     1
-   734 = 26BA			ENH	.ds     1
-   735 = 26BB			BLL 	.ds     1
-   736 = 26BC			BLH 	.ds     1
-   737
-   738 = 26BD			HANDLEREND	= *
+   716 				;;; VARIABLES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   717
+   718 = 25AB			TRIP	.ds	1		; Interrupt Tripped?
+   719 = 25AC			RLEN	.ds	MAXDEV		; RXD Len
+   720 = 25B0			ROFF	.ds	MAXDEV		; RXD offset cursor
+   721 = 25B4			TOFF	.ds	MAXDEV		; TXD offset cursor
+   722 = 25B8			INQDS	.ds	1		; DSTATS to return in inquiry
+   723 = 25B9			DVS2	.ds	MAXDEV		; DVSTAT+2 SAVE
+   724 = 25BD			DVS3	.ds	MAXDEV		; DVSTAT+3 SAVE
+   725
+   726 = 25C1			RBUF	.ds	128		; RXD buffer
+   727 = 2641			TBUF	.ds	128		; TXD buffer
+   728 					
+   729 				;;; BINARY LOADER TEMP VARIABLES ;;;;;;;;;;;;;;;;
+   730
+   731 = 26C1			SL	.ds     1
+   732 = 26C2			SH	.ds     1
+   733 = 26C3			STL	.ds     1
+   734 = 26C4			STH	.ds     1
+   735 = 26C5			ENL	.ds     1
+   736 = 26C6			ENH	.ds     1
+   737 = 26C7			BLL 	.ds     1
+   738 = 26C8			BLH 	.ds     1
    739
-   740 02E0-02E1> 06 23			RUN	START
-   741 					END
+   740 = 26C9			HANDLEREND	= *
+   741
+   742 02E0-02E1> 06 23			RUN	START
+   743 					END
