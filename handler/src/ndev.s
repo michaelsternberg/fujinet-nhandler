@@ -6,6 +6,8 @@
 
 	;; CURRENT IOCB IN ZERO PAGE
 
+COLOR2	=     $02C6    ; MODE-F BKG COLOR TODO (used for testing)
+
 ZIOCB   =     $20      ; ZP IOCB
 ZICHID  =     ZIOCB    ; ID
 ZICDNO  =     ZIOCB+1  ; UNIT #
@@ -237,7 +239,7 @@ READ:	JSR	GDIDX	  	; unit into X
 	BEQ	RDONE		; If RLEN=0 then abort read.
 	STA	READCB+8	; Store in DBYTL
 	STA	READCB+10	; Store in DAUX1
-	LDA	#<READCB	; Set up Read DCB
+RENTR:	LDA	#<READCB	; Set up Read DCB
 	LDY	#>READCB	; ...
 	JSR	DOSIOV		; Do SIO call
 	LDY	DSTATS		; Get DSTATS for error
@@ -350,7 +352,7 @@ SIOVDST:
 	JSR	SIOV		; Call SIOV
 	LDY	DSTATS		; Get STATUS in Y
 	TYA			; Copy it into A
-	RTS			; Done
+	RTS			  ; Done
 	
 ;;; OPEN ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -361,7 +363,7 @@ OPEN:   JSR	GDIDX		; Set IOCB OFFSET TO UNIT #
 	LDA	ZICDNO		; GET Desired unit #
 	STA	OPNDCB+1	; Store in open table
 	LDA	ZICBAL		; Get desired buffer LO
-	STA	OPNDCB+4	; Store in open table
+	STA	OPNDCB+4	  ; Store in open table
 	LDA	ZICBAH		; Get desired buffer HI
 	STA	OPNDCB+5	; Store in open table
 	LDA	ZICAX1		; Get requested Aux1
@@ -433,7 +435,7 @@ GET:	JSR	GDIDX		; Unit into X
 	LDA	RLEN,X		; Get current RX len from last STATUS
 	BNE	GETDRN		; If RLEN > 0 then drain.
 
-	;; Otherwise, we wait for something to happen.
+	;; Otherwise, we wai  t for something to happen.
 
 GETWAI:	JSR	ENPRCD		; Enable Proceed
 	LDA	TRIP		; Did trip change?
@@ -535,10 +537,16 @@ SPECIAL:
 
 	LDA	ZICCOM
 	CMP	#$0F		; 15 = FLUSH
-	BNE	SPQ		; No. Handle protocol commands
+	BNE	SPB		; No. Handle protocol commands
 	JSR	FLUSH		; Yes. Do flush.
 	LDY	#$01		; Flush always successful
 	JMP	SPCDNE		; We're done.
+
+	;; Handle Binary Load
+
+SPB:	CMP	#40		; 40 = BINARY LOAD
+	BNE	SPQ		; No.
+	JMP 	BLOAD		; Yes. Attempt binary load
 
 	;; Handle Protocol commands, do INQDS Query
 
@@ -575,7 +583,7 @@ SPDO:	LDA	ZICDNO		; Unit #
 	STA	SPEDCB+3
 	LDA	ZICBAL		; Ptr to passed in devicespec
 	STA	SPEDCB+4
-	LDA	ZICBAH		; 
+	LDA	ZICBAH		; ssh-add ~/.ssh/id_rsa
 	STA	SPEDCB+5
 	LDA #$00
 	STA SPEDCB+8
@@ -585,6 +593,7 @@ SPDO:	LDA	ZICDNO		; Unit #
 	STA	SPEDCB+10
 	LDA	ZICAX2		; Aux2
 	STA	SPEDCB+11
+
 	LDA	#<SPEDCB
 	LDY	#>SPEDCB
 	JSR	DOSIOV
@@ -597,6 +606,7 @@ SPDO:	LDA	ZICDNO		; Unit #
 
 	JSR	POLL		; Get status, for error
 	LDY	DVSTAT+3	; Get extended error.
+
 	
 SPCDNE:	RTS
 
@@ -611,6 +621,93 @@ SPEDCB .BYTE      DEVIDN  ; DDEVIC
        .BYTE      $00     ; DBYTH
        .BYTE      $FF     ; DAUX1
        .BYTE      $FF     ; DAUX2	
+
+	; Binary Load (Command 40)
+BLOAD:	JSR	OPEN
+
+	; Read header (expect FFFF)
+GETFIL: LDA	#$02
+	STA	RLEN
+	JSR	READ
+
+	LDA	DSTATS
+	CMP	#144
+	BEQ	BLDON
+
+	; Check if FFFF
+	JSR	CHKFF
+
+	; Read start/end addresses
+       	LDA	#$04
+	STA	RLEN
+	JSR	READ
+
+	; Save start/end addresses
+	JSR 	STRAD
+	JSR	BUFLEN
+
+	; Inject start addr into DCB DBUF
+	LDA	STL
+	STA	READCB+4
+	LDA	STH
+	STA	READCB+5 	 
+
+	; Inject payload size into DCB DBYT, AUX
+	LDA	BLL		
+	STA	READCB+8
+	STA	READCB+10
+	LDA	BLH
+	STA	READCB+9
+	STA	READCB+11
+
+	;---------------
+	LDA	#$40
+	STA	COLOR2
+	;---------------
+	JSR	RENTR		; Use entry point into READ
+	
+	; Restore RBUF
+	;LDA	#<RBUF
+	;STA	READCB+4
+	;LDA	#>RBUF
+	;STA	READCB+5
+	LDA 	#$00
+	BEQ 	GETFIL		; Force loop
+
+BLDON:	LDY	#$01		; Return success for now
+	RTS
+
+	; Store start/end addresses
+STRAD:	LDX	#$03		; Iterate 4 times
+STRLP:	LDA	RBUF,X
+	STA	STL,X
+	DEX
+	BNE	STRLP
+	RTS
+	
+	; Calculate binary payload size
+BUFLEN: LDA	ENL
+        SEC
+        SBC	STL
+        STA	BLL             ; LOW BYTE
+        LDA	ENH
+        SBC	STH
+        STA	BLH             ; HIGH BYTE
+        CLC                     ; NOW ADD ONE
+        LDA	BLL
+        ADC	#1
+        STA	BLL
+        LDA	BLH
+        ADC	#0              ; TAKE CARE OF ANY CARRY
+        STA	BLH
+        RTS
+	
+	; Confirm header begins with FFFF
+CHKFF:	INC	RBUF		; If FF then now 00
+	BNE	CHDON		; Quit if it wasnt FF
+	INC	RBUF+1		; Again
+CHDON:	RTS
+
 	
 	;; End of Handler
 
@@ -627,6 +724,17 @@ DVS3	.ds	MAXDEV		; DVSTAT+3 SAVE
 RBUF	.ds	128		; RXD buffer
 TBUF	.ds	128		; TXD buffer
 	
+;;; BINARY LOADER TEMP VARIABLES ;;;;;;;;;;;;;;;;
+
+SL	.ds     1
+SH	.ds     1
+STL	.ds     1
+STH	.ds     1
+ENL	.ds     1
+ENH	.ds     1
+BLL 	.ds     1
+BLH 	.ds     1
+
 HANDLEREND	= *
 
 	RUN	START

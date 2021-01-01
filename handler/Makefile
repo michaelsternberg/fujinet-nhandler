@@ -6,7 +6,7 @@
 
 all: ndev.com
 
-ndev.com:
+ndev.com: src/ndev.s
 	mads src/ndev.s -l:ndev.lst -o:ndev.com
 
 dist: ndev.com
