@@ -725,18 +725,18 @@ SPEC:   ; HANDLE LOCAL COMMANDS.
 
         LDA     ZICCOM
         CMP     #$0F        ; 15 = FLUSH
-        BNE     S25          ; NO.
+        BNE     S1	    ; NO.
         JSR     PFLUSH      ; DO FLUSH
         LDY     #$01        ; SUCCESS
         RTS
 
-S25:	CMP	#$25	    ; POINT
-	BNE	S26	; No.
-	JMP	PPOINT	; Do Point
+;S25:	CMP	#$25	    ; POINT
+;	BNE	S26	; No.
+;	JMP	PPOINT	; Do Point
 	
-S26:	CMP	#$26	; NOTE
-	BNE	S1	; No.
-	JMP	PNOTE	; Do Note
+;S26:	CMP	#$26	; NOTE
+;	BNE	S1	; No.
+;	JMP	PNOTE	; Do Note
 
 S1:     CMP     #40         ; 40 = LOAD AND EXECUTE
         BEQ     S2          ; YES.
@@ -4507,7 +4507,7 @@ HELP_DONE:
         JMP     DO_TYPE
 
 HELP_URL:
-        .BYTE   'N8:HTTPS://raw.githubusercontent.com/michaelsternberg/fujinet-nhandler/nos/nos/HELP/'
+        .BYTE   'N4:HTTPS://raw.githubusercontent.com/michaelsternberg/fujinet-nhandler/nos/nos/HELP/'
 
 HELP_ARTICLE:
     :24 .BYTE   $00
@@ -4783,7 +4783,7 @@ NCOPY_LOOP4:
         CMP     #EOL
         BNE     NCOPY_LOOP4
 
-    ; Copy N8: to the start of the path
+    ; Copy N4: to the start of the path
         LDY     #$02
 NCOPY_LOOP5:
         LDA     OVLBUF-OVL_NCOPY1+NCOPY_N8,Y
@@ -4833,7 +4833,7 @@ NCOPY_SAME_TXT:
         .BYTE   'SAME FILE?',EOL
 
 NCOPY_N8:
-        .BYTE   'N8:'
+        .BYTE   'N4:'
 
         .ALIGN SECTOR_SIZE, $00     ; Align to ATR sector
 END_OVL_NCOPY1:
