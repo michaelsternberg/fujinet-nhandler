@@ -414,7 +414,7 @@ OPNDCB:
         .BYTE   $80     ; DSTATS
         .BYTE   $FF     ; DBUFL
         .BYTE   $FF     ; DBUFH
-        .BYTE   $0F     ; DTIMLO
+        .BYTE   $FE	; DTIMLO
         .BYTE   $00     ; DRESVD
         .BYTE   $00     ; DBYTL
         .BYTE   $01     ; DBYTH
@@ -447,7 +447,7 @@ CLODCB .BYTE    DEVIDN      ; DDEVIC
        .BYTE    $00         ; DSTATS
        .BYTE    $00         ; DBUFL
        .BYTE    $00         ; DBUFH
-       .BYTE    $0F         ; DTIMLO
+       .BYTE    $FE	    ; DTIMLO
        .BYTE    $00         ; DRESVD
        .BYTE    $00         ; DBYTL
        .BYTE    $00         ; DBYTH
@@ -536,7 +536,7 @@ GETDCB:
        .BYTE    $40         ; DSTATS
        .BYTE    <RBUF       ; DBUFL
        .BYTE    >RBUF       ; DBUFH
-       .BYTE    $0F         ; DTIMLO
+       .BYTE    $FE	    ; DTIMLO
        .BYTE    $00         ; DRESVD
        .BYTE    $FF         ; DBYTL
        .BYTE    $00         ; DBYTH
@@ -619,7 +619,7 @@ PUTDCB .BYTE    DEVIDN      ; DDEVIC
        .BYTE    $80         ; DSTATS
        .BYTE    $80         ; DBUFL
        .BYTE    >TBUF       ; DBUFH
-       .BYTE    $0F         ; DTIMLO
+       .BYTE    $FE         ; DTIMLO
        .BYTE    $00         ; DRESVD
        .BYTE    $FF         ; DBYTL
        .BYTE    $00         ; DBYTH
@@ -707,7 +707,7 @@ STADCB: .BYTE   DEVIDN      ; DDEVIC
         .BYTE   $40         ; DSTATS
         .BYTE   <DVSTAT     ; DBUFL
         .BYTE   >DVSTAT     ; DBUFH
-        .BYTE   $0F         ; DTIMLO
+        .BYTE   $FE         ; DTIMLO
         .BYTE   $00         ; DRESVD
         .BYTE   $04         ; DBYTL
         .BYTE   $00         ; DBYTH
@@ -807,7 +807,7 @@ SPEDCB  .BYTE   DEVIDN      ; DDEVIC
         .BYTE   $40         ; DSTATS
         .BYTE   <INQDS      ; DBUFL
         .BYTE   >INQDS      ; DBUFH
-        .BYTE   $0F         ; DTIMLO
+        .BYTE   $FE         ; DTIMLO
         .BYTE   $00         ; DRESVD
         .BYTE   $01         ; DBYTL
         .BYTE   $00         ; DBYTH
@@ -1846,7 +1846,7 @@ GENDCB:
         .BYTE   $80         ; DSTATS
         .BYTE   $FF         ; DBUFL
         .BYTE   $FF         ; DBUFH
-        .BYTE   $1F         ; DTIMLO
+        .BYTE   $FE         ; DTIMLO
         .BYTE   $00         ; DRESVD
         .BYTE   $00         ; DBYTL
         .BYTE   $01         ; DBYTH
@@ -2167,7 +2167,7 @@ BINDCB:
        .BYTE    $40         ; DSTATS
        .BYTE    $FF         ; DBUFL
        .BYTE    $FF         ; DBUFH
-       .BYTE    $0F         ; DTIMLO
+       .BYTE    $FE         ; DTIMLO
        .BYTE    $00         ; DRESVD
        .BYTE    $FF         ; DBYTL
        .BYTE    $FF         ; DBYTH
@@ -2393,7 +2393,7 @@ BINDCB:
        .BYTE    $40         ; DSTATS
        .BYTE    $FF         ; DBUFL
        .BYTE    $FF         ; DBUFH
-       .BYTE    $0F         ; DTIMLO
+       .BYTE    $FE         ; DTIMLO
        .BYTE    $00         ; DRESVD
        .BYTE    $FF         ; DBYTL
        .BYTE    $FF         ; DBYTH
@@ -2568,7 +2568,7 @@ GET_SECTOR_DCB:
        .BYTE    $40         ; DSTATS
        .BYTE    <OVLBUF     ; DBUFL - Destination
        .BYTE    >OVLBUF     ; DBUFH
-       .BYTE    $0F         ; DTIMLO
+       .BYTE    $FE         ; DTIMLO
        .BYTE    $00         ; DRESVD
        .BYTE    $80         ; DBYTL - Bytes to read
        .BYTE    $00         ; DBYTH
@@ -2628,7 +2628,7 @@ PWDDCB:
         .BYTE   $40         ; DSTATS
         .BYTE   <RBUF       ; DBUFL
         .BYTE   >RBUF       ; DBUFH
-        .BYTE   $1F         ; DTIMLO
+        .BYTE   $FE         ; DTIMLO
         .BYTE   $00         ; DRESVD
         .BYTE   $00         ; DBYTL
         .BYTE   $01         ; DBYTH
@@ -3649,7 +3649,7 @@ CIOHND  .WORD   OPEN-1
 
        ; BANNERS
 
-BREADY  .BYTE   '#FUJINET NOS v0.7.2',EOL
+BREADY  .BYTE   '#FUJINET NOS v0.7.3',EOL
 BERROR  .BYTE   '#FUJINET ERROR',EOL
 
         ; MESSAGES
@@ -4043,7 +4043,7 @@ DIRRDCB:
         .BYTE   $40         ; DSTATS
         .BYTE   <RBUF       ; DBUFL
         .BYTE   >RBUF       ; DBUFH
-        .BYTE   $1F         ; DTIMLO
+        .BYTE   $FE         ; DTIMLO
         .BYTE   $00         ; DRESVD
         .BYTE   $00         ; DBYTL
         .BYTE   $00         ; DBYTH
@@ -4119,7 +4119,7 @@ DIRODCB:
         .BYTE   $80             ; DSTATS
         .BYTE   $FF             ; DBUFL
         .BYTE   $FF             ; DBUFH
-        .BYTE   $1F             ; DTIMLO
+        .BYTE   $FE             ; DTIMLO
         .BYTE   $00             ; DRESVD
         .BYTE   $00             ; DBYTL
         .BYTE   $01             ; DBYTH
@@ -5241,7 +5241,7 @@ DIRSTA:
     DTA $60,$C3,$02,$04,$00,C"2 Network  "
     DTA $60,$C3,$02,$04,$00,C"3   OS     "
     DTA $60,$C3,$02,$04,$00,C"4          "
-    DTA $60,$C3,$02,$04,$00,C"5  v0.7.1  "
+    DTA $60,$C3,$02,$04,$00,C"5  v0.7.3  "
     DTA $60,$C3,$02,$04,$00,C"6          "
     DTA $60,$C3,$02,$04,$00,C"7**********"
     DTA $C0
